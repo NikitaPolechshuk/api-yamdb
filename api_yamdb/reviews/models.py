@@ -3,6 +3,8 @@ from django.core.validators import MaxValueValidator
 from django.core.validators import RegexValidator
 from datetime import datetime
 
+SLUG_ERROR = 'Slug может содержать только буквы, цифры, дефисы и подчеркивания'
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -16,7 +18,7 @@ class Category(models.Model):
         validators=[
             RegexValidator(
                 regex='^[-a-zA-Z0-9_]+$',
-                message='Slug может содержать только буквы, цифры, дефисы и подчеркивания'
+                message=SLUG_ERROR
             )
         ]
     )
@@ -42,7 +44,7 @@ class Genre(models.Model):
         validators=[
             RegexValidator(
                 regex='^[-a-zA-Z0-9_]+$',
-                message='Slug может содержать только буквы, цифры, дефисы и подчеркивания'
+                message=SLUG_ERROR
             )
         ]
     )
