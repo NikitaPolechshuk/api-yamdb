@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
@@ -115,6 +116,20 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
+        extra_kwargs = {
+            'name': {'required': True},
+            'slug': {'required': True}
+        }
+
+    def validate_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Название категории не может быть пустым")
+        return value
+
+    def validate_slug(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Slug категории не может быть пустым")
+        return value
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -124,9 +139,10 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True) 
     rating = serializers.IntegerField(read_only=True)
+    description = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = Title
@@ -134,13 +150,24 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating',
             'description', 'genre', 'category'
         )
+        read_only_fields = ('id', 'rating')
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=256,
+        allow_blank=False,  # Запрещаем пустые строки
+        required=True
+    )
+    year = serializers.IntegerField(
+        required=True,
+        allow_null=False  # Запрещаем null значения
+    )
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True
+        many=True,
+        allow_empty=False  # Запрещаем пустой список
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -150,14 +177,48 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description',
+            'name', 'year', 'description',
             'genre', 'category'
         )
+        extra_kwargs = {
+            'name': {'required': False},
+            'year': {'required': False},
+            'description': {'required': False}
+        }
 
-    def validate_year(self, value):
-        from datetime import datetime
-        if value > datetime.now().year:
+    def to_representation(self, instance):
+        # Переключаемся на ReadSerializer для вывода
+        return TitleReadSerializer(instance, context=self.context).data
+
+    def validate_name(self, value):
+        """Проверка что название не пустое"""
+        if not value.strip():
             raise serializers.ValidationError(
-                'Год выпуска не может быть больше текущего'
+                "Название произведения не может быть пустым"
             )
         return value
+
+    def validate_genre(self, value):
+        """Дополнительная валидация поля genre"""
+        if not value:
+            raise serializers.ValidationError(
+                "Произведение должно принадлежать хотя бы к одному жанру"
+            )
+        return value
+
+    def validate_year(self, value):
+        if value is None:
+            raise serializers.ValidationError(
+                "Год выпуска обязателен"
+            )
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                "Год выпуска не может быть больше текущего"
+            )
+        return value
+
+    def validate(self, data):
+        """Глобальная валидация для PATCH-запросов"""
+        if not data:
+            raise serializers.ValidationError("Не указаны данные для обновления")
+        return data
