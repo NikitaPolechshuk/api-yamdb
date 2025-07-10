@@ -35,13 +35,21 @@ def signup(request):
 
         if User.objects.filter(username=username).exists():
             return Response(
-                {"username": ["Пользователь с таким именем уже существует"]},
+                {
+                    "username": [
+                        "Пользователь с таким username уже существует"
+                    ],
+                    "email": [],
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if User.objects.filter(email=email).exists():
             return Response(
-                {"email": ["Пользователь с таким email уже существует"]},
+                {
+                    "username": [],
+                    "email": ["Пользователь с таким email уже существует"],
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         serializer.save()
