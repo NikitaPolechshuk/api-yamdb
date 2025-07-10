@@ -123,12 +123,16 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def validate_name(self, value):
         if not value.strip():
-            raise serializers.ValidationError("Название категории не может быть пустым")
+            raise serializers.ValidationError(
+                "Название категории не может быть пустым"
+            )
         return value
 
     def validate_slug(self, value):
         if not value.strip():
-            raise serializers.ValidationError("Slug категории не может быть пустым")
+            raise serializers.ValidationError(
+                "Slug категории не может быть пустым"
+            )
         return value
 
 
@@ -140,7 +144,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True) 
+    category = CategorySerializer(read_only=True)
     rating = serializers.IntegerField(read_only=True)
     description = serializers.CharField(allow_blank=True)
 
@@ -220,5 +224,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Глобальная валидация для PATCH-запросов"""
         if not data:
-            raise serializers.ValidationError("Не указаны данные для обновления")
+            raise serializers.ValidationError(
+                "Не указаны данные для обновления"
+            )
         return data
