@@ -2,8 +2,12 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
+
 router = DefaultRouter()
-router.register(r"users", views.UserViewSet)
+router.register("users", views.UserViewSet, basename='users')
+router.register("categories", views.CategoryViewSet, basename='categories')
+router.register("genres", views.GenreViewSet, basename='genres')
+router.register("titles", views.TitleViewSet, basename='titles')
 
 urlpatterns = [
     path("v1/auth/signup/", views.signup, name="signup"),
