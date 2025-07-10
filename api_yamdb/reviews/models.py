@@ -59,10 +59,14 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         max_length=256,
-        verbose_name='Название произведения'
+        verbose_name='Название произведения',
+        blank=False,  # Запрещаем пустые значения
+        null=False,
     )
     year = models.IntegerField(
         verbose_name='Год выпуска',
+        blank=False,  # Запрещаем пустые значения
+        null=False,
         validators=[
             MaxValueValidator(
                 datetime.now().year,
@@ -73,7 +77,7 @@ class Title(models.Model):
     description = models.TextField(
         verbose_name='Описание',
         blank=True,
-        null=True
+        default=''  # Устанавливаем пустую строку по умолчанию
     )
     genre = models.ManyToManyField(
         Genre,
