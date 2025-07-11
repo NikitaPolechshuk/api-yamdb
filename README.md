@@ -23,7 +23,7 @@ python -m venv venv   # Для Windows
 
 ```
 source venv/bin/activate   # Для Linux/Mac
-venv\Scripts\activate   # Для Windows
+venv\Scripts\activate.bat   # Для Windows
 ```
 
 Установить зависимости из файла requirements.txt:
