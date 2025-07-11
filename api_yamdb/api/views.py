@@ -156,11 +156,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         # Для операций чтения используем ReadSerializer
-        if self.request.method in ('GET', 'HEAD', 'OPTIONS'):
+        if self.request.method == 'GET':
             return TitleReadSerializer
         # Для операций записи используем WriteSerializer
         return TitleWriteSerializer
