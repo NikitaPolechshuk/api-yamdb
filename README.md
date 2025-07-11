@@ -35,18 +35,21 @@ pip install -r requirements.txt
 Выполнить миграции:
 
 ```
-python3 manage.py migrate
+python3 manage.py migrate   # Для Linux/Mac
+python manage.py migrate   # Для Windows
 ```
 
 Запустить проект:
 
 ```
-python3 manage.py runserver
+python3 manage.py runserver   # Для Linux/Mac
+python manage.py runserver   # Для Windows   
 ```
 
 Загрузка тестовых данных (опционально) из CSV файлов:
 ```
-python3 manage.py load_data --path=/custom/path/to/csv/files/
+python3 manage.py load_data --path=/custom/path/to/csv/files/   # Для Linux/Mac
+python manage.py load_data --path=/custom/path/to/csv/files/   # Для Windows
 ```
 *Путь к csv файлам по умолчанию:* `static/data/`
 
