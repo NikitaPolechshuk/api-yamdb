@@ -46,7 +46,7 @@ python3 manage.py runserver
 
 Загрузка CSV файлов:
 ```
-python manage.py load_data --path=/custom/path/to/csv/files/
+python3 manage.py load_data --path=/custom/path/to/csv/files/
 ```
 *путь по умолчанию:* **'static/data/'**
 
