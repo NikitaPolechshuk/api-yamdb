@@ -1,15 +1,18 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from reviews.models import Category, Genre, Title
-# , Review, Comment
+from reviews.models import Category, Genre, Title, Review, Comment
 
 User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        'username', 'email', 'role',
-        'first_name', 'last_name', 'is_staff'
+        'username',
+        'email',
+        'role',
+        'first_name',
+        'last_name',
+        'is_staff',
     )
     list_filter = ('role', 'is_staff')
     search_fields = ('username', 'email')
@@ -40,8 +43,12 @@ class GenreInline(admin.TabularInline):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'year', 'category',
-        'display_genres', 'description_short', 'rating'
+        'name',
+        'year',
+        'category',
+        'display_genres',
+        'description_short',
+        'rating',
     )
     list_filter = ('category', 'genre', 'year')
     search_fields = ('name', 'category__name', 'genre__name')
@@ -50,7 +57,8 @@ class TitleAdmin(admin.ModelAdmin):
     list_per_page = 20
 
     def display_genres(self, obj):
-        return ", ".join([genre.name for genre in obj.genre.all()])
+        return ', '.join([genre.name for genre in obj.genre.all()])
+
     display_genres.short_description = 'Жанры'
 
     def description_short(self, obj):
@@ -59,50 +67,37 @@ class TitleAdmin(admin.ModelAdmin):
             if len(obj.description) > 50
             else obj.description
         )
+
     description_short.short_description = 'Описание'
 
 
-"""
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = (
-        'title', 'author', 'score',
-        'text_short', 'pub_date'
-    )
+    list_display = ('title', 'author', 'score', 'text_short', 'pub_date')
     list_filter = ('score', 'pub_date')
     search_fields = ('text', 'author__username', 'title__name')
     raw_id_fields = ('title', 'author')
     list_per_page = 20
 
     def text_short(self, obj):
-        return (
-            obj.text[:100] + '...'
-            if len(obj.text) > 100
-            else obj.text
-        )
+        return obj.text[:100] + '...' if len(obj.text) > 100 else obj.text
+
     text_short.short_description = 'Текст отзыва'
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = (
-        'review', 'author', 'text_short',
-        'pub_date'
-    )
+    list_display = ('review', 'author', 'text_short', 'pub_date')
     search_fields = ('text', 'author__username', 'review__text')
     raw_id_fields = ('review', 'author')
     list_per_page = 20
 
     def text_short(self, obj):
-        return (
-            obj.text[:50] + '...'
-            if len(obj.text) > 50
-            else obj.text
-        )
+        return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
+
     text_short.short_description = 'Текст комментария'
-"""
 
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Title, TitleAdmin)
-# admin.site.register(Review, ReviewAdmin)
-# admin.site.register(Comment, CommentAdmin)
+admin.site.register(Review, ReviewAdmin)
+admin.site.register(Comment, CommentAdmin)

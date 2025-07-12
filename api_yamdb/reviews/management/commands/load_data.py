@@ -2,9 +2,7 @@ import csv
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.contrib.auth import get_user_model
-from reviews.models import (
-    Category, Genre, Title, Review, Comment
-)
+from reviews.models import Category, Genre, Title, Review, Comment
 
 User = get_user_model()
 
@@ -17,7 +15,7 @@ class Command(BaseCommand):
             '--path',
             type=str,
             default='static/data/',
-            help='Base path to CSV files'
+            help='Base path to CSV files',
         )
 
     @transaction.atomic
@@ -38,10 +36,7 @@ class Command(BaseCommand):
             for row in reader:
                 Category.objects.get_or_create(
                     id=row['id'],
-                    defaults={
-                        'name': row['name'],
-                        'slug': row['slug']
-                    }
+                    defaults={'name': row['name'], 'slug': row['slug']},
                 )
         self.stdout.write(self.style.SUCCESS('Categories loaded'))
 
@@ -52,10 +47,7 @@ class Command(BaseCommand):
             for row in reader:
                 Genre.objects.get_or_create(
                     id=row['id'],
-                    defaults={
-                        'name': row['name'],
-                        'slug': row['slug']
-                    }
+                    defaults={'name': row['name'], 'slug': row['slug']},
                 )
         self.stdout.write(self.style.SUCCESS('Genres loaded'))
 
@@ -72,8 +64,8 @@ class Command(BaseCommand):
                         'role': row['role'],
                         'bio': row['bio'] or '',
                         'first_name': row['first_name'] or '',
-                        'last_name': row['last_name'] or ''
-                    }
+                        'last_name': row['last_name'] or '',
+                    },
                 )
         self.stdout.write(self.style.SUCCESS('Users loaded'))
 
@@ -82,15 +74,19 @@ class Command(BaseCommand):
         with open(file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                category = Category.objects.get(id=row['category']) if row['category'] else None
+                category = (
+                    Category.objects.get(id=row['category'])
+                    if row['category']
+                    else None
+                )
                 Title.objects.get_or_create(
                     id=row['id'],
                     defaults={
                         'name': row['name'],
                         'year': row['year'],
                         'category': category,
-                        'description': row.get('description', '')
-                    }
+                        'description': row.get('description', ''),
+                    },
                 )
         self.stdout.write(self.style.SUCCESS('Titles loaded'))
 
@@ -103,7 +99,7 @@ class Command(BaseCommand):
                 genre = Genre.objects.get(id=row['genre_id'])
                 title.genre.add(genre)
         self.stdout.write(self.style.SUCCESS('Genre-Title relations loaded'))
-    
+
     def load_reviews(self, file_path):
         self.stdout.write(f'Loading reviews from {file_path}...')
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -118,8 +114,8 @@ class Command(BaseCommand):
                         'text': row['text'],
                         'author': author,
                         'score': row['score'],
-                        'pub_date': row['pub_date']
-                    }
+                        'pub_date': row['pub_date'],
+                    },
                 )
         self.stdout.write(self.style.SUCCESS('Reviews loaded'))
 
@@ -136,7 +132,7 @@ class Command(BaseCommand):
                         'review': review,
                         'text': row['text'],
                         'author': author,
-                        'pub_date': row['pub_date']
-                    }
+                        'pub_date': row['pub_date'],
+                    },
                 )
         self.stdout.write(self.style.SUCCESS('Comments loaded'))

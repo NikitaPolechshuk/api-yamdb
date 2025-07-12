@@ -8,8 +8,8 @@ def generate_confirmation_code():
 
 
 def send_confirmation_code(email, confirmation_code):
-    subject = "Код подтверждения YaMDb"
-    message = f"Ваш код подтверждения: {confirmation_code}"
+    subject = 'Код подтверждения YaMDb'
+    message = f'Ваш код подтверждения: {confirmation_code}'
 
     try:
         send_mail(
