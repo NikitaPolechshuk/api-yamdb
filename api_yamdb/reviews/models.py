@@ -1,6 +1,5 @@
 from django.db import models
-from django.core.validators import MaxValueValidator
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, RegexValidator
 from datetime import datetime
 
 SLUG_REGEX = '^[-a-zA-Z0-9_]+$'
