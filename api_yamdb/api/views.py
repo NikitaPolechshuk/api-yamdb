@@ -216,7 +216,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Title.objects.annotate(
             calculated_rating=Avg('reviews__score')
-        ).all()
+        ).all().order_by('name')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
