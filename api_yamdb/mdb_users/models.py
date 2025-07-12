@@ -3,38 +3,38 @@ from django.db import models
 
 
 class User(AbstractUser):
-    USER = "user"
-    MODERATOR = "moderator"
-    ADMIN = "admin"
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
 
     ROLE_CHOICES = [
-        (USER, "Пользователь"),
-        (MODERATOR, "Модератор"),
-        (ADMIN, "Администратор"),
+        (USER, 'Пользователь'),
+        (MODERATOR, 'Модератор'),
+        (ADMIN, 'Администратор'),
     ]
 
-    email = models.EmailField(unique=True, verbose_name="Электронная почта")
+    email = models.EmailField(unique=True, verbose_name='Электронная почта')
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
         default=USER,
-        verbose_name="Роль пользователя",
+        verbose_name='Роль пользователя',
     )
-    bio = models.TextField(blank=True, verbose_name="Краткая информация")
+    bio = models.TextField(blank=True, verbose_name='Краткая информация')
     first_name = models.CharField(
-        max_length=150, blank=True, verbose_name="Имя"
+        max_length=150, blank=True, verbose_name='Имя'
     )
     last_name = models.CharField(
-        max_length=150, blank=True, verbose_name="Фамилия"
+        max_length=150, blank=True, verbose_name='Фамилия'
     )
     confirmation_code = models.CharField(
-        max_length=100, blank=True, verbose_name="Код подтверждения"
+        max_length=100, blank=True, verbose_name='Код подтверждения'
     )
 
     class Meta:
-        ordering = ["username"]
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        ordering = ['username']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     @property
     def is_admin(self):
