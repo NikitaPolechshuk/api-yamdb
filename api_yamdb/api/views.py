@@ -1,73 +1,40 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
-from rest_framework import status, viewsets, permissions, mixins, filters
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework.filters import SearchFilter
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
-from .serializers import (
-    SignUpSerializer,
-    TokenSerializer,
-    UserSerializer,
-    UserProfileSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-    ReviewSerializer,
-    CommentSerializer,
-)
-from mdb_users.permissions import (
-    IsAdmin,
-    IsAdminOrReadOnly,
-    IsAuthorOrModeratorOrAdmin,
-)
+from api_yamdb.exceptions import SendConfirmationCodeError
+from mdb_users.permissions import (IsAdmin, IsAdminOrReadOnly,
+                                   IsAuthorOrModeratorOrAdmin)
 from mdb_users.tokens import generate_confirmation_code, send_confirmation_code
+from reviews.models import Category, Genre, Review, Title
 
-from reviews.models import Category, Genre, Title, Review
 from .filters import TitleFilter
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SignUpSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenSerializer, UserProfileSerializer,
+                          UserSerializer)
 
 User = get_user_model()
-
-
-def check_user_exists(username, email):
-    username_occupied = User.objects.filter(username=username).exists()
-    email_occupied = User.objects.filter(email=email).exists()
-
-    return {
-        'username_occupied': username_occupied,
-        'email_occupied': email_occupied,
-        'both_occupied': username_occupied and email_occupied,
-    }
-
-
-def get_validation_errors(username, email, check_results):
-    username_occupied = check_results['username_occupied']
-    email_occupied = check_results['email_occupied']
-
-    if username_occupied and email_occupied:
-        if not User.objects.filter(username=username, email=email).exists():
-            return {
-                'username': ['Пользователь с таким username уже существует'],
-                'email': ['Пользователь с таким email уже существует'],
-            }
-
-    elif username_occupied:
-        return {'username': ['Пользователь с таким username уже существует']}
-
-    elif email_occupied:
-        return {'email': ['Пользователь с таким email уже существует']}
-    return None
 
 
 def handle_existing_user(user, email):
     confirmation_code = generate_confirmation_code()
     user.confirmation_code = confirmation_code
     user.save()
-    send_confirmation_code(email, confirmation_code)
+    try:
+        send_confirmation_code(email, confirmation_code)
+    except SendConfirmationCodeError as e:
+        return Response(
+            {'detail': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
     return Response(
         {'username': user.username, 'email': user.email},
         status=status.HTTP_200_OK,
@@ -85,16 +52,6 @@ def signup(request):
         user = User.objects.filter(username=username, email=email).first()
         if user:
             return handle_existing_user(user, email)
-
-        check_results = check_user_exists(username, email)
-        validation_errors = get_validation_errors(
-            username, email, check_results
-        )
-
-        if validation_errors:
-            return Response(
-                validation_errors, status=status.HTTP_400_BAD_REQUEST
-            )
 
         user = serializer.save()
         confirmation_code = generate_confirmation_code()

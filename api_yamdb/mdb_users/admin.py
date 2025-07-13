@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
 from .models import User
 
 
@@ -69,6 +70,7 @@ class UserAdmin(BaseUserAdmin):
         'is_staff',
         'is_active',
         'date_joined',
+        'confirmation_code',
     )
     list_filter = ('role', 'is_staff', 'is_active', 'date_joined')
     search_fields = ('username', 'email', 'first_name', 'last_name')
