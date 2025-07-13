@@ -24,12 +24,32 @@ class SignUpSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Имя пользователя 'me' недопустимо."
             )
-
-        if not re.match(r'^[\w.@+-]+\Z', value):
-            raise serializers.ValidationError(
-                'Имя пользователя содержит недопустимые символы.'
-            )
         return value
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        
+        if username and email:
+            username_exists = User.objects.filter(username=username).exists()
+            email_exists = User.objects.filter(email=email).exists()
+            
+            if username_exists and email_exists:
+                if not User.objects.filter(username=username, email=email).exists():
+                    raise serializers.ValidationError({
+                        'username': 'Пользователь с таким username уже существует',
+                        'email': 'Пользователь с таким email уже существует'
+                    })
+            elif username_exists:
+                raise serializers.ValidationError({
+                    'username': 'Пользователь с таким username уже существует'
+                })
+            elif email_exists:
+                raise serializers.ValidationError({
+                    'email': 'Пользователь с таким email уже существует'
+                })
+        
+        return data
 
     def create(self, validated_data):
         user = User.objects.create_user(

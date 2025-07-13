@@ -1,10 +1,10 @@
 import secrets
 from django.core.mail import send_mail
 from django.conf import settings
-
+from api_yamdb.exceptions import SendConfirmationCodeError
 
 def generate_confirmation_code():
-    return secrets.token_urlsafe(32)
+    return secrets.token_urlsafe(settings.CONFIRMATION_CODE_BYTES_LENGTH)
 
 
 def send_confirmation_code(email, confirmation_code):
@@ -20,5 +20,5 @@ def send_confirmation_code(email, confirmation_code):
             fail_silently=False,
         )
         return True
-    except Exception:
-        return False
+    except Exception as e:
+        raise SendConfirmationCodeError(f'Ошибка при отправке кода подтверждения: {e}') from e
