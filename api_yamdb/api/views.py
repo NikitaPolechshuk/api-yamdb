@@ -1,35 +1,25 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
-from rest_framework import status, viewsets, permissions, mixins, filters
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework.filters import SearchFilter
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from api_yamdb.exceptions import SendConfirmationCodeError
-from .serializers import (
-    SignUpSerializer,
-    TokenSerializer,
-    UserSerializer,
-    UserProfileSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-    ReviewSerializer,
-    CommentSerializer,
-)
-from mdb_users.permissions import (
-    IsAdmin,
-    IsAdminOrReadOnly,
-    IsAuthorOrModeratorOrAdmin,
-)
+from mdb_users.permissions import (IsAdmin, IsAdminOrReadOnly,
+                                   IsAuthorOrModeratorOrAdmin)
 from mdb_users.tokens import generate_confirmation_code, send_confirmation_code
+from reviews.models import Category, Genre, Review, Title
 
-from reviews.models import Category, Genre, Title, Review
 from .filters import TitleFilter
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SignUpSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenSerializer, UserProfileSerializer,
+                          UserSerializer)
 
 User = get_user_model()
 

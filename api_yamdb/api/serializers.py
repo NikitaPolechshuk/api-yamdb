@@ -1,11 +1,12 @@
 from datetime import datetime
-from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from reviews.models import Category, Genre, Title, Review, Comment
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
-import re
+import api_yamdb.constants as constants
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -22,33 +23,36 @@ class SignUpSerializer(serializers.Serializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError(
-                "Имя пользователя 'me' недопустимо."
+                constants.USER_USERNAME_ME_ERROR
             )
         return value
 
     def validate(self, data):
         username = data.get('username')
         email = data.get('email')
-        
+
         if username and email:
             username_exists = User.objects.filter(username=username).exists()
             email_exists = User.objects.filter(email=email).exists()
-            
-            if username_exists and email_exists:
-                if not User.objects.filter(username=username, email=email).exists():
+            username_and_email_exists = username_exists and email_exists
+
+            if username_and_email_exists:
+                if not User.objects.filter(username=username,
+                                           email=email
+                                           ).exists():
                     raise serializers.ValidationError({
-                        'username': 'Пользователь с таким username уже существует',
-                        'email': 'Пользователь с таким email уже существует'
+                        'username': constants.USER_USERNAME_OCCUPIED_ERROR,
+                        'email': constants.USER_EMAIL_OCCUPIED_ERROR
                     })
             elif username_exists:
                 raise serializers.ValidationError({
-                    'username': 'Пользователь с таким username уже существует'
+                    'username': constants.USER_USERNAME_OCCUPIED_ERROR
                 })
             elif email_exists:
                 raise serializers.ValidationError({
-                    'email': 'Пользователь с таким email уже существует'
+                    'email': constants.USER_EMAIL_OCCUPIED_ERROR
                 })
-        
+
         return data
 
     def create(self, validated_data):
@@ -70,11 +74,13 @@ class TokenSerializer(serializers.Serializer):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'Пользователь с таким именем не найден.', code='not_found'
+                constants.USER_NOT_FOUND_ERROR, code='not_found'
             )
 
         if user.confirmation_code != confirmation_code:
-            raise serializers.ValidationError('Неверный код подтверждения.')
+            raise serializers.ValidationError(
+                constants.USER_WRONG_CONFIRMATION_CODE_ERROR
+            )
 
         attrs['user'] = user
         return attrs
@@ -102,7 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError(
-                "Имя пользователя 'me' недопустимо."
+                constants.USER_USERNAME_ME_ERROR
             )
         return value
 
@@ -123,7 +129,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError(
-                "Имя пользователя 'me' недопустимо."
+                constants.USER_USERNAME_ME_ERROR
             )
         return value
 
@@ -137,14 +143,14 @@ class CategorySerializer(serializers.ModelSerializer):
     def validate_name(self, value):
         if not value.strip():
             raise serializers.ValidationError(
-                'Название категории не может быть пустым'
+                constants.CATEGORY_EMPTY_NAME_ERROR
             )
         return value
 
     def validate_slug(self, value):
         if not value.strip():
             raise serializers.ValidationError(
-                'Slug категории не может быть пустым'
+                constants.CATEGORY_EMPTY_SLUG_ERROR
             )
         return value
 
@@ -213,7 +219,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         """Проверка что название не пустое"""
         if not value.strip():
             raise serializers.ValidationError(
-                'Название произведения не может быть пустым'
+                constants.TITLE_EMPTY_NAME_ERROR
             )
         return value
 
@@ -221,16 +227,18 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         """Дополнительная валидация поля genre"""
         if not value:
             raise serializers.ValidationError(
-                'Произведение должно принадлежать хотя бы к одному жанру'
+                constants.TITLE_GENRE_REQUIRED_ERROR
             )
         return value
 
     def validate_year(self, value):
         if value is None:
-            raise serializers.ValidationError('Год выпуска обязателен')
+            raise serializers.ValidationError(
+                constants.TITLE_YEAR_CANNOT_BE_EMPTY_ERROR
+            )
         if value > datetime.now().year:
             raise serializers.ValidationError(
-                'Год выпуска не может быть больше текущего'
+                constants.TITLE_YEAR_CANNOT_BE_GT_CURRENT_ERROR
             )
         return value
 
@@ -238,7 +246,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         """Глобальная валидация для PATCH-запросов"""
         if not data:
             raise serializers.ValidationError(
-                'Не указаны данные для обновления'
+                constants.TITLE_PATCH_VALIDATION_ERROR
             )
         return data
 
@@ -255,7 +263,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate_score(self, value):
         if value < 1 or value > 10:
-            raise serializers.ValidationError('Оценка должна быть от 1 до 10')
+            raise serializers.ValidationError(
+                constants.REVIEW_SCORE_VALIDATION_ERROR
+            )
         return value
 
     def validate(self, data):
@@ -267,7 +277,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 title_id=title_id, author=request.user
             ).exists():
                 raise serializers.ValidationError(
-                    'Вы уже оставили отзыв на это произведение'
+                    constants.REVIEW_ALREADY_EXISTS_ERROR
                 )
         return data
 

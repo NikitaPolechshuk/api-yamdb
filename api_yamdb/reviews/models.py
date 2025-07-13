@@ -1,16 +1,14 @@
-from django.db import models
-from django.core.validators import (
-    MaxValueValidator,
-    MinValueValidator,
-    RegexValidator,
-)
-from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
+from django.db import models
+from django.utils import timezone
+
 import api_yamdb.constants as constants
 
-
-SLUG_VALIDATOR = RegexValidator(regex=constants.SLUG_REGEX, message=constants.SLUG_ERROR)
+SLUG_VALIDATOR = RegexValidator(regex=constants.SLUG_REGEX,
+                                message=constants.SLUG_ERROR)
 
 User = get_user_model()
 
@@ -24,7 +22,8 @@ def validate_current_year(value):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=constants.CATEGORY_NAME_MAX_LENGTH, verbose_name='Название категории')
+    name = models.CharField(max_length=constants.CATEGORY_NAME_MAX_LENGTH,
+                            verbose_name='Название категории')
     slug = models.SlugField(
         max_length=constants.CATEGORY_SLUG_MAX_LENGTH,
         unique=True,
@@ -42,7 +41,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=constants.GENRE_NAME_MAX_LENGTH, verbose_name='Название жанра')
+    name = models.CharField(max_length=constants.GENRE_NAME_MAX_LENGTH,
+                            verbose_name='Название жанра')
     slug = models.SlugField(
         max_length=constants.GENRE_SLUG_MAX_LENGTH,
         unique=True,
@@ -112,8 +112,12 @@ class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     score = models.IntegerField(
         validators=[
-            MinValueValidator(constants.REVIEW_SCORE_MIN, message=f'Оценка не может быть меньше {constants.REVIEW_SCORE_MIN}'),
-            MaxValueValidator(constants.REVIEW_SCORE_MAX, message=f'Оценка не может быть больше {constants.REVIEW_SCORE_MAX}'),
+            MinValueValidator(constants.REVIEW_SCORE_MIN,
+                              message=('Оценка не может быть меньше '
+                                       f'{constants.REVIEW_SCORE_MIN}')),
+            MaxValueValidator(constants.REVIEW_SCORE_MAX,
+                              message=('Оценка не может быть больше '
+                                       f'{constants.REVIEW_SCORE_MAX}')),
         ],
         verbose_name='Оценка',
     )
