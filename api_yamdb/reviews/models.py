@@ -4,14 +4,24 @@ from django.core.validators import (
     MinValueValidator,
     RegexValidator,
 )
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.contrib.auth import get_user_model
-from datetime import datetime
+
 
 SLUG_REGEX = '^[-a-zA-Z0-9_]+$'
 SLUG_ERROR = 'Slug может содержать только буквы, цифры, дефисы и подчеркивания'
 SLUG_VALIDATOR = RegexValidator(regex=SLUG_REGEX, message=SLUG_ERROR)
 
 User = get_user_model()
+
+
+def validate_current_year(value):
+    current_year = timezone.now().year
+    if value > current_year:
+        raise ValidationError(
+            f'Год выпуска не может быть больше текущего ({current_year})'
+        )
 
 
 class Category(models.Model):
@@ -54,19 +64,12 @@ class Title(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название произведения',
-        blank=False,  # Запрещаем пустые значения
         null=False,
     )
     year = models.IntegerField(
         verbose_name='Год выпуска',
-        blank=False,  # Запрещаем пустые значения
         null=False,
-        validators=[
-            MaxValueValidator(
-                datetime.now().year,
-                message='Год не может быть больше текущего',
-            )
-        ],
+        validators=[validate_current_year],
     )
     description = models.TextField(
         verbose_name='Описание',

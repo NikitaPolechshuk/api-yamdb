@@ -4,6 +4,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from reviews.models import Category, Genre, Title, Review, Comment
+
 import re
 
 User = get_user_model()
@@ -161,10 +162,8 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
         max_length=256,
         allow_blank=False,  # Запрещаем пустые строки
-        required=True,
     )
     year = serializers.IntegerField(
-        required=True,
         allow_null=False,  # Запрещаем null значения
     )
     genre = serializers.SlugRelatedField(
@@ -181,8 +180,8 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('name', 'year', 'description', 'genre', 'category')
         extra_kwargs = {
-            'name': {'required': False},
-            'year': {'required': False},
+            'name': {'required': True},
+            'year': {'required': True},
             'description': {'required': False},
         }
 
