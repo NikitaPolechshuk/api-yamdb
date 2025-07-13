@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from reviews.models import Category, Genre, Title, Review, Comment
+
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -48,7 +49,6 @@ class TitleAdmin(admin.ModelAdmin):
         'category',
         'display_genres',
         'description_short',
-        'rating',
     )
     list_filter = ('category', 'genre', 'year')
     search_fields = ('name', 'category__name', 'genre__name')
